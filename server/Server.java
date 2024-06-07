@@ -11,6 +11,16 @@ class ServerThread extends ServerFunc {
     }
 
     public void run() {
+        File db = new File("database.db");
+
+        if (!db.exists()) {
+            try {
+                db.createNewFile();
+            } catch (IOException e) {
+                System.err.println(e);
+            }
+        }
+
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),
