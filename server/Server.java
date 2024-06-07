@@ -19,7 +19,7 @@ class ServerThread extends ServerFunc {
 
             Date date = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            db.insertData("dai", "./music", sdf.format(date).toString(), "");
+            db.insertData("usr", "./music", sdf.format(date).toString(), "");
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),
                     true);
@@ -39,6 +39,7 @@ class ServerThread extends ServerFunc {
                 System.out.println("closing...");
             }
         }
+        System.out.println(getChatData());
         db.close();
     }
 }
