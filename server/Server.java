@@ -33,6 +33,7 @@ class ServerThread extends ServerFunc {
                 System.out.println("closing...");
             }
         }
+        db.close();
     }
 }
 

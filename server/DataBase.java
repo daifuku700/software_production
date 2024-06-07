@@ -1,6 +1,5 @@
 package server;
 
-import java.io.File;
 import java.sql.*;
 
 public class DataBase {
@@ -17,7 +16,8 @@ public class DataBase {
 
             this.stmt = this.c.createStatement();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
+            System.err.println("cannot connect to database");
         }
     }
 
@@ -46,6 +46,22 @@ public class DataBase {
         }
     }
 
+    public int getNextId() {
+        int id = 0;
+        try {
+            ResultSet rs = stmt.executeQuery("SELECT * FROM chat ORDER BY id DESC LIMIT 1");
+            while (rs.next()) {
+                id = rs.getInt("id");
+            }
+            rs.close();
+            System.out.println("got id");
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+            System.err.println("cannot get id");
+        }
+        return id + 1;
+    }
+
     public String getPath(int id) {
         String path = null;
         try {
@@ -54,10 +70,23 @@ public class DataBase {
                 path = rs.getString("path");
             }
             rs.close();
+            System.out.println("got path");
         } catch (SQLException e) {
             System.err.println("Error: " + e.getMessage());
             System.err.println("cannot get path");
         }
         return path;
+    }
+
+    public void close() {
+        try {
+            if (this.c != null) {
+                this.c.close();
+            }
+            System.out.println("closed connection");
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("cannot close connection");
+        }
     }
 }
