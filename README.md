@@ -8,7 +8,7 @@ make
 ```
 2. run the server
 ```
-java -cp .:sqlite-jdbc-3.46.0.0.jar:.:slf4j-api-2.0.13.jar server.Server
+java -cp :./lib/sqlite-jdbc-3.46.0.0.jar:./lib/slf4j-api-2.0.13.jar server.Server
 ```
 3. run the client
 ```
