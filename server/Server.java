@@ -2,6 +2,8 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 class ServerThread extends ServerFunc {
     Socket socket;
@@ -12,8 +14,12 @@ class ServerThread extends ServerFunc {
 
     public void run() {
         DataBase db = new DataBase();
-        db.createTable();
         try {
+            db.createTable();
+
+            Date date = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            db.insertData("dai", "./music", sdf.format(date).toString(), "");
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),
                     true);

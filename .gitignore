@@ -24,3 +24,6 @@ hs_err_pid*
 replay_pid*
 
 *.db
+
+!slf4j-api-2.0.13.jar
+!sqlite-jdbc-3.46.0.0.jar
