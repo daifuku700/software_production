@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.TargetDataLine;
 
 public class ClientFunc extends Thread {
     private Socket socket;
@@ -26,8 +29,8 @@ public class ClientFunc extends Thread {
     public void run() {
         try {
             // クライアントの処理
-            makeMP3("sample.mp3");
-            playMP3("sample.mp3");
+            makeWAV("sample.wav");
+            playWAV("sample.wav");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,17 +43,39 @@ public class ClientFunc extends Thread {
         }
     }
 
-    public void makeMP3(String fileName) {
-        try {
-            // mp3ファイル作成
-            // ...以下に記載
+    public void makeWAV(String fileName) {
+        AudioFormat format = new AudioFormat(44100, 16, 2, true, false);
+        DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+        if (!AudioSystem.isLineSupported(info)) {
+            System.err.println("Line not supported");
+            return;
+        }
+
+        try (TargetDataLine line = (TargetDataLine) AudioSystem.getLine(info)) {
+            line.open(format);
+            line.start();
+
+            AudioInputStream ais = new AudioInputStream(line);
+            File file = new File(fileName);
+
+            // 録音時間を5秒に制限
+            long recordTime = 5000; // 5秒
+            long endTime = System.currentTimeMillis() + recordTime;
+
+            // 録音データを読み取り、WAVファイルに書き込む
+            try (AudioInputStream shortAis = new AudioInputStream(ais, format,
+                    (long) (format.getFrameRate() * recordTime / 1000.0))) {
+                AudioSystem.write(shortAis, AudioFileFormat.Type.WAVE, file);
+            }
+
             System.out.println(fileName + " created!");
-        } catch (Exception e) {
+
+        } catch (LineUnavailableException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void playMP3(String fileName) {
+    public void playWAV(String fileName) {
         try {
             File file = new File(fileName);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
