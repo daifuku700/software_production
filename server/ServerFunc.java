@@ -1,18 +1,25 @@
 package server;
 
-import java.io.File;
-import java.sql.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ServerFunc extends Thread {
     public ServerFunc() {
         super();
     };
 
-    public static void createTable(File db) {
-        String cmd = "CREATE TABLE IF NOT EXISTS chat " +
-                "(id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "usr TEXT NOT NULL, path TEXT NOT NULL," +
-                "date TEXT NOT NULL, description TEXT);";
-
+    public void moveFile(String fileName) {
+        DataBase db = new DataBase();
+        Path src = Paths.get(fileName);
+        Path dest = Paths.get("./music/" + db.getNextId());
+        try {
+            Files.move(src, dest);
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            System.err.println("cannot move file");
+        }
+        db.close();
     }
 }

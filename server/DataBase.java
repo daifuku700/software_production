@@ -13,7 +13,6 @@ public class DataBase {
         try {
             Class.forName("org.sqlite.JDBC");
             this.c = DriverManager.getConnection("jdbc:sqlite:" + this.DB_NAME);
-
             this.stmt = this.c.createStatement();
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
@@ -31,7 +30,7 @@ public class DataBase {
             System.out.println("created table");
         } catch (SQLException e) {
             System.err.println("Error: " + e.getMessage());
-            System.err.println("cannot create table");
+            System.err.println("table already exists");
         }
     }
 
