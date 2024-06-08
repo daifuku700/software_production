@@ -16,7 +16,7 @@ public class ServerFunc extends Thread {
     };
 
     // ファイルを受信する関数
-    public void receiveFile(Socket socket) { 
+    public void receiveFile(Socket socket) {
         String outputFilepath = "server/received_audio.wav"; // 受信したファイルの保存先
         byte[] buffer = new byte[512]; // ファイル受信時のバッファ
 
@@ -37,11 +37,13 @@ public class ServerFunc extends Thread {
             System.out.println("File received successfully.");
 
         } catch (IOException e) {
-            System.err.println("File receive error: "  + e.getMessage());
-        }}
+            System.err.println("File receive error: " + e.getMessage());
+        }
+    }
 
     /**
      * this is a function for moving a file when you get a file from the client
+     *
      * @param fileName name of the file that you want to move to the music directory
      */
     public void moveFile(String fileName) {
@@ -59,6 +61,7 @@ public class ServerFunc extends Thread {
 
     /**
      * this is a function for getting chat data from the database
+     *
      * @return chat from the database [{usr, path, date, description}, ...]
      */
     public ArrayList<Map<String, String>> getChatData() {
