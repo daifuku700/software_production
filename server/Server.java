@@ -24,6 +24,18 @@ class ServerThread extends ServerFunc {
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),
                     true);
 
+            // メッセージを受け取るフェーズ
+            String line;
+            while ((line = in.readLine()) != null) {
+                if (line.equals("Send")) { // クライアントからファイル送信の意思表示を受け取る
+                    System.out.println("Client wants to send a file.");
+                    out.println("Ready"); // サーバーが受取り準備完了を示す
+
+                    // ファイルデータを受け取る
+                    receiveFile(socket);
+                }
+            }
+
         } catch (NumberFormatException | NullPointerException e) { // clientが接続を切った場合
             System.out.println(Thread.currentThread().getName() + "が切断されました");
         } catch (SocketException e) { // java.net.SocketException: Connection reset
