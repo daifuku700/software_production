@@ -29,8 +29,8 @@ public class ClientFunc extends Thread {
     public void run() {
         try {
             // クライアントの処理
-            makeWAV("sample.wav");
-            playWAV("sample.wav");
+            makeWAV("./client/sample.wav");
+            playWAV("./client/sample.wav");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,7 +60,6 @@ public class ClientFunc extends Thread {
 
             // 録音時間を5秒に制限
             long recordTime = 5000; // 5秒
-            long endTime = System.currentTimeMillis() + recordTime;
 
             // 録音データを読み取り、WAVファイルに書き込む
             try (AudioInputStream shortAis = new AudioInputStream(ais, format,
