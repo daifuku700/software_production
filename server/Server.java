@@ -2,6 +2,8 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 class ServerThread extends ServerFunc {
     Socket socket;
@@ -11,20 +13,28 @@ class ServerThread extends ServerFunc {
     }
 
     public void run() {
-        File db = new File("database.db");
-
-        if (!db.exists()) {
-            try {
-                db.createNewFile();
-            } catch (IOException e) {
-                System.err.println(e);
-            }
-        }
-
+        DataBase db = new DataBase();
         try {
+            db.createTable();
+
+            Date date = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            db.insertData("usr", "./music", sdf.format(date).toString(), "");
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),
                     true);
+
+            // メッセージを受け取るフェーズ
+            String line;
+            while ((line = in.readLine()) != null) {
+                if (line.equals("Send")) { // クライアントからファイル送信の意思表示を受け取る
+                    System.out.println("Client wants to send a file.");
+                    out.println("Ready"); // サーバーが受取り準備完了を示す
+
+                    // ファイルデータを受け取る
+                    receiveFile(socket);
+                }
+            }
 
         } catch (NumberFormatException | NullPointerException e) { // clientが接続を切った場合
             System.out.println(Thread.currentThread().getName() + "が切断されました");
@@ -41,6 +51,8 @@ class ServerThread extends ServerFunc {
                 System.out.println("closing...");
             }
         }
+        System.out.println(getChatData());
+        db.close();
     }
 }
 

@@ -25,7 +25,7 @@ public class ClientFunc {
         this.in = in;
         this.out = out;
     }
-
+  
     public void makeWAV(String fileName) {
         AudioFormat format = new AudioFormat(44100, 16, 2, true, false);
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -43,7 +43,6 @@ public class ClientFunc {
 
             // 録音時間を5秒に制限
             long recordTime = 5000; // 5秒
-            long endTime = System.currentTimeMillis() + recordTime;
 
             // 録音データを読み取り、WAVファイルに書き込む
             try (AudioInputStream shortAis = new AudioInputStream(ais, format,
