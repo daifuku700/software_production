@@ -15,7 +15,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
-public class ClientFunc extends Thread {
+public class ClientFunc {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
@@ -24,23 +24,6 @@ public class ClientFunc extends Thread {
         this.socket = socket;
         this.in = in;
         this.out = out;
-    }
-
-    public void run() {
-        try {
-            // クライアントの処理
-            makeWAV("sample.wav");
-            playWAV("sample.wav");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public void makeWAV(String fileName) {

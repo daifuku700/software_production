@@ -20,9 +20,8 @@ public class Client {
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),
                     true);
 
-            // インスタンス作成
             ClientFunc clientFunc = new ClientFunc(socket, in, out);
-            clientFunc.start();
+            clientFunc.makeWAV("output.wav");
         } finally {
             System.out.println("closing...");
             socket.close();
