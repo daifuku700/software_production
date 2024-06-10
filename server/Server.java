@@ -27,13 +27,23 @@ class ServerThread extends ServerFunc {
             // メッセージを受け取るフェーズ
             String line;
             while ((line = in.readLine()) != null) {
-                if (line.equals("Send")) { // クライアントからファイル送信の意思表示を受け取る
-                    System.out.println("Client wants to send a file.");
-                    out.println("Ready"); // サーバーが受取り準備完了を示す
-
-                    // ファイルデータを受け取る
-                    receiveFile(socket);
+                switch (line) {
+                    case "Send":
+                        System.out.println("Client wants to send a file.");
+                        out.println("Ready");
+                        receiveFile(socket);
+                        out.println("Get");
+                        break;
+                    case "Get":
+                        break;
                 }
+                // if (line.equals("Send")) { // クライアントからファイル送信の意思表示を受け取る
+                //     System.out.println("Client wants to send a file.");
+                //     out.println("Ready"); // サーバーが受取り準備完了を示す
+
+                //     // ファイルデータを受け取る
+                //     receiveFile(socket);
+                // }
             }
 
         } catch (NumberFormatException | NullPointerException e) { // clientが接続を切った場合
