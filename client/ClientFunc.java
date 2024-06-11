@@ -1,11 +1,10 @@
 package client;
 
-import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.Socket;
-
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -16,17 +15,10 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
 public class ClientFunc {
-    private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
-
-    public ClientFunc(Socket socket, BufferedReader in, PrintWriter out) {
-        this.socket = socket;
-        this.in = in;
-        this.out = out;
+    public ClientFunc() {
     }
-  
-    public void makeWAV(String fileName) {
+
+    public static void makeWAV(String fileName) {
         AudioFormat format = new AudioFormat(44100, 16, 2, true, false);
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
         if (!AudioSystem.isLineSupported(info)) {
@@ -57,7 +49,7 @@ public class ClientFunc {
         }
     }
 
-    public void playWAV(String fileName) {
+    public static void playWAV(String fileName) {
         try {
             File file = new File(fileName);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
@@ -78,5 +70,54 @@ public class ClientFunc {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // 音声ファイルの送信
+    public static void sendFile(DataInputStream dis, DataOutputStream dos, String usr, String filePath) {
+        try {
+            // ファイル送信の意思表示
+            dos.writeUTF("send");
+
+            // サーバーからの応答を確認した後ファイルを送信
+            String response = dis.readUTF();
+            if (!response.equals("ready")) {
+                System.err.println("ERR: cannot get response from server");
+                return;
+            }
+
+            File file = new File(filePath);
+
+            if (!file.exists()) {
+                System.out.println("ERR: cannot find audio file");
+                return;
+            }
+
+            dos.writeLong(file.length());
+
+            dos.writeUTF(usr);
+
+            byte[] buffer = new byte[512]; // ファイル送信時のバッファ
+
+            try (FileInputStream fis = new FileInputStream(file)) {
+                // ファイルをストリームで送信
+                int read = 0;
+                while ((read = fis.read(buffer)) > 0) {
+                    dos.write(buffer, 0, read);
+                }
+
+                System.out.println("file send successfully");
+            } catch (IOException e) {
+                System.err.println("File send error: " + e.getMessage());
+            }
+
+            response = dis.readUTF();
+            if (!response.equals("finish")) {
+                System.err.println("ERR: cannot get response from server");
+                return;
+            }
+        } catch (IOException e) {
+            System.err.println("File send error: " + e.getMessage());
+        }
+
     }
 }

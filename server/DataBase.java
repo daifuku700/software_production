@@ -16,6 +16,7 @@ public class DataBase {
             Class.forName("org.sqlite.JDBC");
             this.c = DriverManager.getConnection("jdbc:sqlite:" + this.DB_NAME);
             this.stmt = this.c.createStatement();
+            createTable();
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             System.err.println("cannot connect to database");
