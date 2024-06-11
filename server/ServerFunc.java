@@ -1,13 +1,15 @@
 package server;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.Socket;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 
 public class ServerFunc extends Thread {
@@ -16,26 +18,34 @@ public class ServerFunc extends Thread {
     };
 
     // ファイルを受信する関数
-    public void receiveFile(Socket socket) {
-        String outputFilepath = "server/received_audio.wav"; // 受信したファイルの保存先
-        byte[] buffer = new byte[512]; // ファイル受信時のバッファ
-
+    public void receiveFile(DataInputStream dis, DataOutputStream dos) {
         try {
-            InputStream inputStream = socket.getInputStream();
-            FileOutputStream outputStream = new FileOutputStream(outputFilepath);
+            dos.writeUTF("ready");
 
-            // ファイルをストリームで受信
-            int fileLength;
-            while ((fileLength = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, fileLength);
+            String outputFilepath = "server/audio.wav"; // 受信したファイルの保存先
+            long fileSize = dis.readLong();
+            String usr = dis.readUTF();
+
+            byte[] buffer = new byte[512]; // ファイル受信時のバッファ
+
+            try (FileOutputStream fos = new FileOutputStream(outputFilepath)) {
+                int read = 0;
+                long remaining = fileSize;
+                while ((read = dis.read(buffer, 0, (int) Math.min(buffer.length, (int) remaining))) > 0) {
+                    remaining -= read;
+                    fos.write(buffer, 0, read);
+                }
             }
 
-            // 終了処理
-            outputStream.flush();
-            outputStream.close();
-            inputStream.close();
-            System.out.println("File received successfully.");
+            dos.writeUTF("finish");
 
+            System.out.println("file received successfully");
+            moveFile(outputFilepath);
+
+            Date date = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DataBase db = new DataBase();
+            db.insertData(usr, "./server/music/" + (db.getMaxId() + 1) + ".wav", sdf.format(date).toString(), "");
         } catch (IOException e) {
             System.err.println("File receive error: " + e.getMessage());
         }
@@ -48,8 +58,8 @@ public class ServerFunc extends Thread {
      */
     public void moveFile(String fileName) {
         DataBase db = new DataBase();
-        Path src = Paths.get("./server/" + fileName);
-        Path dest = Paths.get("./server/music/" + db.getMaxId() + ".wav");
+        Path src = Paths.get(fileName);
+        Path dest = Paths.get("./server/music/" + (db.getMaxId() + 1) + ".wav");
         try {
             Files.move(src, dest);
         } catch (IOException e) {
