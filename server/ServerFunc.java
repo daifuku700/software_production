@@ -58,6 +58,15 @@ public class ServerFunc extends Thread {
      */
     public void moveFile(String fileName) {
         DataBase db = new DataBase();
+        Path folder = Paths.get("./server/music");
+        if (!Files.exists(folder)) {
+            try {
+                Files.createDirectory(folder);
+            } catch (IOException e) {
+                System.err.println("ERR: " + e.getMessage());
+                System.err.println("cannot create directory");
+            }
+        }
         Path src = Paths.get(fileName);
         Path dest = Paths.get("./server/music/" + (db.getMaxId() + 1) + ".wav");
         try {
