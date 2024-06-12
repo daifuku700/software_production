@@ -1,3 +1,4 @@
+
 package server;
 
 import java.io.*;
@@ -11,20 +12,28 @@ class ServerThread extends ServerFunc {
     }
 
     public void run() {
-        File db = new File("database.db");
-
-        if (!db.exists()) {
-            try {
-                db.createNewFile();
-            } catch (IOException e) {
-                System.err.println(e);
-            }
-        }
-
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())),
-                    true);
+
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+            // db.insertData("usr", "./music", sdf.format(date).toString(), "");
+
+            String line;
+            do {
+                // メッセージを受け取るフェーズ
+                line = dis.readUTF();
+                switch (line) {
+                    case "send":
+                        //receiveFile(dis, dos);
+                        break;
+                    case "get":
+                        sendFile(dis, dos);
+                        break;
+                    case "end":
+                        System.out.println("end");
+                        break;
+                }
+            } while (!line.equals("end"));
 
         } catch (NumberFormatException | NullPointerException e) { // clientが接続を切った場合
             System.out.println(Thread.currentThread().getName() + "が切断されました");
