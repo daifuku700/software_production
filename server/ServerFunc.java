@@ -65,6 +65,8 @@ public class ServerFunc extends Thread {
             } catch (IOException e) {
                 System.err.println("ERR: " + e.getMessage());
                 System.err.println("cannot create directory");
+                db.close();
+                return;
             }
         }
         Path src = Paths.get(fileName);
