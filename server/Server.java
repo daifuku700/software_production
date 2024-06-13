@@ -24,7 +24,7 @@ class ServerThread extends ServerFunc {
                 line = dis.readUTF();
                 switch (line) {
                     case "send":
-                        //receiveFile(dis, dos);
+                        receiveFile(dis, dos);
                         break;
                     case "get":
                         sendFile(dis, dos);
