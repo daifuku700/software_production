@@ -2,7 +2,6 @@ package server;
 
 import java.sql.*;
 import java.util.HashMap;
-import java.util.Map;
 
 public class DataBase {
     private final String DB_NAME = "database.db";
