@@ -1,3 +1,4 @@
+
 package client;
 
 import java.io.DataInputStream;
@@ -28,6 +29,9 @@ public class Client extends ClientFunc {
                 switch (cmd) {
                     case "send":
                         sendFile(dis, dos, usr, "./client/audio.wav");
+                        break;
+                    case "get":
+                        receiveFile(dis, dos, 0);
                         break;
                     case "end":
                         dos.writeUTF("end");

@@ -1,3 +1,4 @@
+
 package server;
 
 import java.io.*;
@@ -26,6 +27,7 @@ class ServerThread extends ServerFunc {
                         receiveFile(dis, dos);
                         break;
                     case "get":
+                        sendFile(dis, dos);
                         break;
                     case "end":
                         System.out.println("end");

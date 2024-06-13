@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -71,7 +72,40 @@ public class ClientFunc {
             e.printStackTrace();
         }
     }
+    public static void receiveFile(DataInputStream dis, DataOutputStream dos, int ID){
+        try{
+            dos.writeUTF("get");
 
+            String response = dis.readUTF();
+            if (!response.equals("ready")) {
+                System.err.println("ERR: cannot get response from server");
+                return;
+            }
+
+            dos.writeInt(ID);
+
+            String fileName = "client/audio.wav";
+            long fileSize = dis.readLong();
+            try (FileOutputStream fos = new FileOutputStream(fileName)) {
+                byte[] buffer = new byte[512];
+                int read = 0;
+                long remaining = fileSize;
+                while ((read = dis.read(buffer, 0, Math.min(buffer.length, (int) remaining))) > 0) {
+                    remaining -= read;
+                    fos.write(buffer, 0, read);
+                }
+                System.out.println("File " + fileName + " received.");
+            }
+            response = dis.readUTF();
+            if (!response.equals("finish")) {
+                System.err.println("ERR: cannot get response from server");
+                return;
+            }
+            
+        }catch (IOException e) {
+            System.err.println("File receive error: " + e.getMessage());
+        }
+    }
     // 音声ファイルの送信
     public static void sendFile(DataInputStream dis, DataOutputStream dos, String usr, String filePath) {
         try {
