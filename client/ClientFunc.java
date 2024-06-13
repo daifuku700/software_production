@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -72,8 +76,9 @@ public class ClientFunc {
             e.printStackTrace();
         }
     }
-    public static void receiveFile(DataInputStream dis, DataOutputStream dos, int ID){
-        try{
+
+    public static void receiveFile(DataInputStream dis, DataOutputStream dos, int ID) {
+        try {
             dos.writeUTF("get");
 
             String response = dis.readUTF();
@@ -84,7 +89,25 @@ public class ClientFunc {
 
             dos.writeInt(ID);
 
-            String fileName = "client/audio.wav";
+            response = dis.readUTF();
+            if (!response.equals("ID OK")) {
+                System.err.println("ERR: cannot find id");
+                return;
+            }
+
+            String fileName = "./client/music/" + ID + ".wav";
+
+            Path folder = Paths.get("./client/music");
+            if (!Files.exists(folder)) {
+                try {
+                    Files.createDirectory(folder);
+                } catch (IOException e) {
+                    System.err.println("ERR: " + e.getMessage());
+                    System.err.println("cannot create directory");
+                    fileName = "./client" + ID + ".wav";
+                }
+            }
+
             long fileSize = dis.readLong();
             try (FileOutputStream fos = new FileOutputStream(fileName)) {
                 byte[] buffer = new byte[512];
@@ -101,11 +124,11 @@ public class ClientFunc {
                 System.err.println("ERR: cannot get response from server");
                 return;
             }
-            
-        }catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("File receive error: " + e.getMessage());
         }
     }
+
     // 音声ファイルの送信
     public static void sendFile(DataInputStream dis, DataOutputStream dos, String usr, String filePath) {
         try {

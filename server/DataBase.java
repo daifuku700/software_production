@@ -83,8 +83,8 @@ public class DataBase {
      * @param id id of the chat
      * @return chat from the database {usr, path, date, description}
      */
-    public Map<String, String> get(int id) {
-        Map<String, String> data = new HashMap<String, String>();
+    public HashMap<String, String> get(int id) {
+        HashMap<String, String> data = new HashMap<String, String>();
         try {
             ResultSet rs = stmt.executeQuery("SELECT * FROM chat WHERE id = " + id);
             while (rs.next()) {
