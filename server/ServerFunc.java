@@ -10,12 +10,48 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
 
 public class ServerFunc extends Thread {
     public ServerFunc() {
         super();
     };
+
+    public void sendFile(DataInputStream dis, DataOutputStream dos) {
+        try {
+            dos.writeUTF("ready");
+
+            int fileID = dis.readInt();
+
+            DataBase db = new DataBase();
+            HashMap<String, String> chat = db.get(fileID);
+            if (!chat.containsKey("path")) {
+                System.err.println("ERR: cannot find id");
+                dos.writeUTF("ID ERR");
+                return;
+            } else {
+                dos.writeUTF("ID OK");
+            }
+            File file = new File(chat.get("path")); // dbからIDで持ってくる
+            dos.writeLong(file.length());
+
+            try (FileInputStream fis = new FileInputStream(file)) {
+                byte[] buffer = new byte[512];
+                int read = 0;
+                while ((read = fis.read(buffer)) > 0) {
+                    dos.write(buffer, 0, read);
+                }
+                System.out.println("File " + file.getName() + " sent.");
+            }
+            dos.writeUTF("finish");
+            db.close();
+        } catch (IOException e) {
+            System.err.println("File send error: " + e.getMessage());
+        }
+    }
 
     // ファイルを受信する関数
     public void receiveFile(DataInputStream dis, DataOutputStream dos) {

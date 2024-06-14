@@ -1,3 +1,4 @@
+
 package client;
 
 import java.io.DataInputStream;
@@ -23,11 +24,16 @@ public class Client extends ClientFunc {
             String cmd;
             do {
                 System.out.print("input next cmd: ");
-                cmd = scan.nextLine();
+                cmd = scan.next();
 
                 switch (cmd) {
                     case "send":
                         sendFile(dis, dos, usr, "./client/audio.wav");
+                        break;
+                    case "get":
+                        System.out.print("input ID: ");
+                        int ID = scan.nextInt();
+                        receiveFile(dis, dos, ID);
                         break;
                     case "end":
                         dos.writeUTF("end");
