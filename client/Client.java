@@ -6,6 +6,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Client extends ClientFunc {
@@ -33,7 +35,17 @@ public class Client extends ClientFunc {
                     case "get":
                         System.out.print("input ID: ");
                         int ID = scan.nextInt();
-                        receiveFile(dis, dos, ID);
+                        if (ID < 1) {
+                            System.out.println("ID should be positive");
+                            break;
+                        }
+                        getFile(dis, dos, ID);
+                        break;
+                    case "getChat":
+                        ArrayList<HashMap<String, String>> chat = getChat(dis, dos);
+                        for (HashMap<String, String> c : chat) {
+                            System.out.println(c);
+                        }
                         break;
                     case "end":
                         dos.writeUTF("end");
