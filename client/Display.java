@@ -22,7 +22,7 @@ public class Display extends JFrame {
     public Display() {
         super("音声ソフトアプリ");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 500); // サイズを変更
+        setSize(500, 500);
         setLocationRelativeTo(null);
 
         initComponents();
@@ -34,7 +34,8 @@ public class Display extends JFrame {
         // リストモデルとリスト
         listModel = new DefaultListModel<>();
         recordingList = new JList<>(listModel);
-        JScrollPane scrollPane = new JScrollPane(recordingList);
+        recordingList.setCellRenderer(new BubbleListCellRenderer()); // カスタムレンダラー
+        JScrollPane scrollPane = new JScrollPane(recordingList); // スクロールバー
 
         // ボタンパネル
         JPanel buttonPanel = new JPanel(new FlowLayout());
@@ -43,17 +44,18 @@ public class Display extends JFrame {
         sendButton = new JButton("送信");
         buttonPanel.add(sendButton);
 
-        // メインパネルにコンポーネントを追加
+        // メインパネル
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(scrollPane, BorderLayout.EAST); // 自身の録音を右側に配置
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         add(mainPanel);
 
-        // ボタンの動作を設定
+        // ボタン動作
         recordButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 listModel.addElement("録音 " + (listModel.getSize() + 1));
                 // 録音処理を実装
+
             }
         });
         sendButton.addActionListener(new ActionListener() {
