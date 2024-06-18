@@ -2,11 +2,13 @@ package client;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Insets;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
+import javax.swing.border.AbstractBorder;
 
 public class BubbleListCellRenderer extends JLabel implements ListCellRenderer<Object> {
     public BubbleListCellRenderer() {
@@ -18,8 +20,9 @@ public class BubbleListCellRenderer extends JLabel implements ListCellRenderer<O
             boolean cellHasFocus) {
         setText(value.toString());
 
-        // テキストを丸い枠で囲むための設定
-        setBorder(BorderFactory.createMatteBorder(10, 10, 10, 10, Color.WHITE));
+        // Set rounded border
+        setBorder(new RoundBorder(10, Color.WHITE));
+
         setOpaque(true);
         setBackground(Color.LIGHT_GRAY);
         setForeground(Color.BLACK);
@@ -33,5 +36,32 @@ public class BubbleListCellRenderer extends JLabel implements ListCellRenderer<O
         }
 
         return this;
+    }
+
+    private static class RoundBorder extends AbstractBorder {
+        private final int radius;
+        private final Color color;
+
+        public RoundBorder(int radius, Color color) {
+            this.radius = radius;
+            this.color = color;
+        }
+
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            g.setColor(color);
+            g.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c) {
+            return new Insets(radius, radius, radius, radius);
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c, Insets insets) {
+            insets.left = insets.top = insets.right = insets.bottom = radius;
+            return insets;
+        }
     }
 }
