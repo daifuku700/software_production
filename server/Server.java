@@ -16,7 +16,6 @@ class ServerThread extends ServerFunc {
 
             DataInputStream dis = new DataInputStream(socket.getInputStream());
             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-            // db.insertData("usr", "./music", sdf.format(date).toString(), "");
 
             String line;
             do {
@@ -24,10 +23,13 @@ class ServerThread extends ServerFunc {
                 line = dis.readUTF();
                 switch (line) {
                     case "send":
-                        receiveFile(dis, dos);
+                        getFile(dis, dos);
                         break;
                     case "get":
                         sendFile(dis, dos);
+                        break;
+                    case "getChat":
+                        sendChat(dis, dos);
                         break;
                     case "end":
                         System.out.println("end");

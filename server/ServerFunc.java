@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -54,7 +53,7 @@ public class ServerFunc extends Thread {
     }
 
     // ファイルを受信する関数
-    public void receiveFile(DataInputStream dis, DataOutputStream dos) {
+    public void getFile(DataInputStream dis, DataOutputStream dos) {
         try {
             dos.writeUTF("ready");
 
@@ -82,6 +81,7 @@ public class ServerFunc extends Thread {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             DataBase db = new DataBase();
             db.insertData(usr, "./server/music/" + (db.getMaxId() + 1) + ".wav", sdf.format(date).toString(), "");
+            db.close();
         } catch (IOException e) {
             System.err.println("File receive error: " + e.getMessage());
         }
@@ -116,19 +116,25 @@ public class ServerFunc extends Thread {
         db.close();
     }
 
-    /**
-     * this is a function for getting chat data from the database
-     *
-     * @return chat from the database [{usr, path, date, description}, ...]
-     */
-    public ArrayList<Map<String, String>> getChatData() {
-        ArrayList<Map<String, String>> chatData = new ArrayList<Map<String, String>>();
+    public void sendChat(DataInputStream dis, DataOutputStream dos) {
         DataBase db = new DataBase();
-        int maxId = db.getMaxId();
-        for (int i = 1; i <= maxId; i++) {
-            chatData.add(db.get(i));
+        ArrayList<HashMap<String, String>> chat = db.getAll();
+        try {
+            dos.writeUTF("ready");
+            dos.writeInt(chat.size());
+            for (HashMap<String, String> data : chat) {
+                dos.writeUTF(data.get("id"));
+                dos.writeUTF(data.get("usr"));
+                dos.writeUTF(data.get("path"));
+                dos.writeUTF(data.get("date"));
+                dos.writeUTF(data.get("description"));
+            }
+            dos.writeUTF("finish");
+            System.out.println("chat data sent");
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            System.err.println("cannot send chat data");
         }
         db.close();
-        return chatData;
     }
 }
