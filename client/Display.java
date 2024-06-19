@@ -18,6 +18,7 @@ public class Display extends JFrame {
     private JButton sendButton;
     private JList<String> recordingList;
     private DefaultListModel<String> listModel;
+    private boolean isRecording;
 
     public Display() {
         super("音声ソフトアプリ");
@@ -31,6 +32,7 @@ public class Display extends JFrame {
     }
 
     private void initComponents() {
+        isRecording = false;
         // リストモデルとリスト
         listModel = new DefaultListModel<>();
         recordingList = new JList<>(listModel);
@@ -40,27 +42,37 @@ public class Display extends JFrame {
         // ボタンパネル
         JPanel buttonPanel = new JPanel(new FlowLayout());
         recordButton = new JButton("録音");
-        buttonPanel.add(recordButton);
         sendButton = new JButton("送信");
+        sendButton.setEnabled(false);
+        buttonPanel.add(recordButton);
         buttonPanel.add(sendButton);
+
+        // 左パネル(データベースから取得した音声データを表示するパネル)
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.add(new JScrollPane(new JList<>(new DefaultListModel<>())), BorderLayout.WEST);
 
         // メインパネル
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(scrollPane, BorderLayout.EAST); // 自身の録音を右側に配置
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(leftPanel, BorderLayout.WEST); // データベース上の録音を左側に配置
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH); // ボタンパネルを下部に配置
         add(mainPanel);
 
         // ボタン動作
         recordButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                listModel.addElement("録音 " + (listModel.getSize() + 1));
+                handleRecordButton();
                 // 録音処理を実装
 
             }
         });
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                listModel.addElement("録音 " + (listModel.getSize() + 1));
+                sendButton.setEnabled(false);
                 // 送信処理を実装
+
+                isRecording = false;
             }
         });
 
@@ -73,6 +85,35 @@ public class Display extends JFrame {
                 }
             }
         });
+    }
+
+    private void handleRecordButton() {
+        if (!isRecording) {
+            startRecording();
+        }
+    }
+
+    private void startRecording() {
+        isRecording = true;
+        sendButton.setEnabled(false);
+        recordButton.setText("録音中...");
+        // 録音処理を実装
+        System.out.println("録音を開始しました");
+        // ClientFuncを呼び出す
+        new Thread(new Runnable() {
+            public void run() {
+                ClientFunc.makeWAV("_audio.wav");
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        recordButton.setText("録音");
+                        isRecording = false;
+                        sendButton.setEnabled(true);
+                        System.out.println("録音を終了しました");
+                    }
+                });
+            }
+        }).start();
     }
 
     public static void main(String[] args) {
