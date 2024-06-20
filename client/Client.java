@@ -12,12 +12,18 @@ public class Client extends ClientFunc {
     public static void main(String args[]) throws IOException {
         InetAddress addr = InetAddress.getByName("localhost");
         System.out.println("addr = " + addr);
-        Socket socket = new Socket(addr, 8080);
+        Socket mainsocket = new Socket(addr, 8080);
         Scanner scan = new Scanner(System.in);
+
+        // 即時通信用のスレッドを開始
+        Socket notifySocket = new Socket(addr, 8081);
+        Thread notificationThread = new Thread(new ClientFunc.NotificationHandler(notifySocket));
+        notificationThread.start();
+
         try {
-            System.out.println("socket = " + socket);
-            DataInputStream dis = new DataInputStream(socket.getInputStream());
-            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+            System.out.println("main socket = " + mainsocket);
+            DataInputStream dis = new DataInputStream(mainsocket.getInputStream());
+            DataOutputStream dos = new DataOutputStream(mainsocket.getOutputStream());
 
             String usr = "usr";
 
@@ -29,6 +35,7 @@ public class Client extends ClientFunc {
                 switch (cmd) {
                     case "send":
                         sendFile(dis, dos, usr, "./client/audio.wav");
+                        notifyServer(); // 二つ目のサーバーに通知
                         break;
                     case "get":
                         System.out.print("input ID: ");
@@ -45,7 +52,8 @@ public class Client extends ClientFunc {
         } finally {
             System.out.println("closing...");
             scan.close();
-            socket.close();
+            mainsocket.close();
+            notifySocket.close();
         }
     }
 }

@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,10 +13,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.io.File;
 import java.io.FileInputStream;
 
 public class ServerFunc extends Thread {
+    private static CopyOnWriteArrayList<Socket> clients = new CopyOnWriteArrayList<>();
+
     public ServerFunc() {
         super();
     };
@@ -130,5 +134,27 @@ public class ServerFunc extends Thread {
         }
         db.close();
         return chatData;
+    }
+
+    // クライアントソケットをリストに追加する関数
+    public static void addClient(Socket clientSocket) {
+        clients.add(clientSocket);
+    }
+
+    // 誰かが音声メッセージを送信したことを、クライアント全員に通知する関数
+    public static void notifyClients() {
+        for (Socket client : clients) {
+            try {
+                DataOutputStream dos = new DataOutputStream(client.getOutputStream());
+                dos.writeUTF("Someone has sent an audio message.");
+            } catch (IOException e) {
+                try {
+                    client.close(); // エラーが発生したクライアントソケットを閉じる
+                    clients.remove(client); // リストから削除
+                } catch (IOException ex) {
+                    System.out.println("Error closing client socket: " + ex.getMessage());
+                }
+            }
+        }
     }
 }
