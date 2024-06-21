@@ -164,4 +164,8 @@ public class ServerFunc extends Thread {
             }
         }
     }
+
+    public static void removeClient(Socket client) {
+        clients.remove(client);
+    }
 }
