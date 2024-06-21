@@ -43,6 +43,7 @@ class ServerThread extends ServerFunc {
             System.err.println(e);
         } finally {
             try {
+                ServerFunc.removeClient(socket);
                 socket.close();
             } catch (IOException e) {
                 System.err.println(e);
