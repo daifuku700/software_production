@@ -24,6 +24,9 @@ public class Client extends ClientFunc {
             String usr = "usr";
 
             String cmd;
+            
+            usr = login();
+            System.out.println("login: " + usr);
             do {
                 System.out.print("input next cmd: ");
                 cmd = scan.next();

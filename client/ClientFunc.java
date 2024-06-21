@@ -21,6 +21,11 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 public class ClientFunc {
     public ClientFunc() {
     }
@@ -211,4 +216,21 @@ public class ClientFunc {
         }
         return chat;
     }
+
+    public static String login(){
+        LoginFrame frame = new LoginFrame();
+        frame.setVisible(true);
+        synchronized (frame) {
+            while (frame.getUsername().isEmpty()) {
+                try {
+                    frame.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        frame.setVisible(false);
+        return frame.getUsername();
+    }
+    
 }
