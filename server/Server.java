@@ -56,18 +56,57 @@ class ServerThread extends ServerFunc {
 }
 
 public class Server {
-    static int PORT = 8080;
+    static int MAIN_PORT = 8080;
+    static int NOTIFY_PORT = 8081;
 
     public static void main(String args[]) throws IOException {
-        ServerSocket soc = new ServerSocket(PORT);
+        ServerSocket mainsoc = new ServerSocket(MAIN_PORT);
+        ServerSocket notifysoc = new ServerSocket(NOTIFY_PORT);
+
+        Thread notifyServerThread = new Thread(() -> {
+            try {
+                while (true) {
+                    Socket clientSocket = notifysoc.accept();
+                    ServerFunc.addClient(clientSocket);
+                    new Thread(() -> {
+                        try (DataInputStream dis = new DataInputStream(clientSocket.getInputStream())) {
+                            while (true) {
+                                String message = dis.readUTF();
+                                if (message.equals("notify")) {
+                                    ServerFunc.notifyClients();
+                                }
+                            }
+                        } catch (IOException e) {
+                            System.out.println("Error in notify server thread: " + e.getMessage());
+                        }
+                    }).start();
+                }
+            } catch (IOException e) {
+                System.out.println("Error in notify server: " + e.getMessage());
+            }
+        });
+
+        notifyServerThread.start();
+
         try {
             while (true) {
-                Socket s = soc.accept();
+                Socket s = mainsoc.accept();
                 ServerThread st = new ServerThread(s);
                 st.start();
             }
+        } catch (IOException e) {
+            System.out.println("Error in main server: " + e.getMessage());
         } finally {
-            soc.close();
+            try {
+                mainsoc.close();
+            } catch (IOException e) {
+                System.out.println("Error closing main server socket: " + e.getMessage());
+            }
+            try {
+                notifysoc.close();
+            } catch (IOException e) {
+                System.out.println("Error closing notify server socket: " + e.getMessage());
+            }
         }
     }
 }
