@@ -8,8 +8,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
 
-import javax.swing.SwingUtilities;
-
 public class Client extends ClientFunc {
     public static void main(String args[]) throws IOException {
         InetAddress addr = InetAddress.getByName("localhost");
@@ -35,11 +33,7 @@ public class Client extends ClientFunc {
             String tmpUsr = usr; // 再代入用の一時変数
             System.out.println("login: " + usr);
 
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    new Display(mainSocket, notifySocket, tmpUsr, dis, dos);
-                }
-            });
+            new Display(mainSocket, notifySocket, tmpUsr, dis, dos);
 
             // do {
             // System.out.print("input next cmd: ");
@@ -73,10 +67,10 @@ public class Client extends ClientFunc {
             // }
             // } while (!cmd.equals("end"));
         } finally {
-            System.out.println("closing...");
-            scan.close();
-            mainSocket.close();
-            notifySocket.close();
+            // System.out.println("closing...");
+            // scan.close();
+            // mainSocket.close();
+            // notifySocket.close();
         }
     }
 }

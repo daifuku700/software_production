@@ -4,8 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,19 +29,23 @@ public class Display extends JFrame {
     private boolean isRecording;
     private DataInputStream dis;
     private DataOutputStream dos;
-    private String usr;
+    private String user;
+    private Socket mainSocket;
+    private Socket notifySocket;
 
     private static final int PANEL_WIDTH = 200;
 
     public Display(Socket mainSocket, Socket notifySocket, String usr, DataInputStream dis, DataOutputStream dos) {
         super("音声ソフトアプリ");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(500, 500);
         setLocationRelativeTo(null);
 
         this.dis = dis;
         this.dos = dos;
-        this.usr = usr;
+        this.user = usr;
+        this.mainSocket = mainSocket;
+        this.notifySocket = notifySocket;
 
         initComponents();
 
@@ -70,16 +77,16 @@ public class Display extends JFrame {
         // ボタン動作
         recordButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // 録音処理
                 handleRecordButton();
+                // 録音処理を実装
             }
         });
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 listModel.addElement("録音 " + (listModel.getSize() + 1));
                 sendButton.setEnabled(false);
-                // 送信処理
-                ClientFunc.sendFile(dis, dos, usr, "./client/_audio.wav");
+                // 送信処理を実装
+                ClientFunc.sendFile(dis, dos, user, "./client/audio.wav");
                 sendButton.setEnabled(false);
                 isRecording = false;
             }
@@ -102,6 +109,19 @@ public class Display extends JFrame {
 
         // チャットデータをロードしてリストに表示
         new Thread(() -> loadChatData()).start();
+
+        // ウィンドウリスナー(ウィンドウが閉じられたときにソケットを閉じる)
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                try {
+                    mainSocket.close();
+                    notifySocket.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
     private void loadChatData() {
@@ -127,20 +147,14 @@ public class Display extends JFrame {
         // 録音処理を実装
         System.out.println("録音を開始しました");
         // ClientFuncを呼び出す
-        new Thread(new Runnable() {
-            public void run() {
-                ClientFunc.makeWAV("_audio.wav");
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        recordButton.setText("録音");
-                        isRecording = false;
-                        sendButton.setEnabled(true);
-                        System.out.println("録音を終了しました");
-                    }
-                });
-            }
-        }).start();
+        // 録音処理をメインスレッドで実行
+        ClientFunc.makeWAV("./client/_audio.wav");
+
+        // 録音処理が終わった後にUIを更新
+        recordButton.setText("録音");
+        isRecording = false;
+        sendButton.setEnabled(true);
+        System.out.println("録音を終了しました");
     }
 
     public static void main(String[] args) {
