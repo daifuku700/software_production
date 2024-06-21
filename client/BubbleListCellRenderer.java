@@ -2,6 +2,7 @@ package client;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Insets;
 
@@ -11,8 +12,11 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.AbstractBorder;
 
 public class BubbleListCellRenderer extends JLabel implements ListCellRenderer<Object> {
-    public BubbleListCellRenderer() {
+    private final int width;
+
+    public BubbleListCellRenderer(int width) {
         setOpaque(true);
+        this.width = width;
     }
 
     @Override
@@ -34,6 +38,8 @@ public class BubbleListCellRenderer extends JLabel implements ListCellRenderer<O
             setBackground(Color.LIGHT_GRAY);
             setForeground(Color.BLACK);
         }
+
+        setPreferredSize(new Dimension(width, getPreferredSize().height));
 
         return this;
     }

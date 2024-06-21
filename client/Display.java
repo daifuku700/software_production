@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +21,8 @@ public class Display extends JFrame {
     private DefaultListModel<String> listModel;
     private boolean isRecording;
 
+    private static final int PANEL_WIDTH = 200;
+
     public Display() {
         super("音声ソフトアプリ");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,7 +39,7 @@ public class Display extends JFrame {
         // リストモデルとリスト
         listModel = new DefaultListModel<>();
         recordingList = new JList<>(listModel);
-        recordingList.setCellRenderer(new BubbleListCellRenderer()); // カスタムレンダラー
+        recordingList.setCellRenderer(new BubbleListCellRenderer(PANEL_WIDTH)); // 横幅を指定
         JScrollPane scrollPane = new JScrollPane(recordingList); // スクロールバー
 
         // ボタンパネル
@@ -49,7 +52,11 @@ public class Display extends JFrame {
 
         // 左パネル(データベースから取得した音声データを表示するパネル)
         JPanel leftPanel = new JPanel(new BorderLayout());
-        leftPanel.add(new JScrollPane(new JList<>(new DefaultListModel<>())), BorderLayout.WEST);
+        JList<String> leftList = new JList<>(new DefaultListModel<>());
+        leftList.setCellRenderer(new BubbleListCellRenderer(PANEL_WIDTH)); // 横幅を指定
+        JScrollPane leftScrollPane = new JScrollPane(leftList); // スクロールバー
+        leftPanel.add(leftScrollPane, BorderLayout.CENTER);
+        leftPanel.setPreferredSize(new Dimension(PANEL_WIDTH, getHeight()));
 
         // メインパネル
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -63,7 +70,6 @@ public class Display extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 handleRecordButton();
                 // 録音処理を実装
-
             }
         });
         sendButton.addActionListener(new ActionListener() {
@@ -71,7 +77,6 @@ public class Display extends JFrame {
                 listModel.addElement("録音 " + (listModel.getSize() + 1));
                 sendButton.setEnabled(false);
                 // 送信処理を実装
-
                 isRecording = false;
             }
         });
