@@ -26,11 +26,11 @@ public class Display extends JFrame {
     private boolean isRecording;
     private DataInputStream dis;
     private DataOutputStream dos;
-    private String user;
+    private String usr;
 
     private static final int PANEL_WIDTH = 200;
 
-    public Display(Socket mainSocket, Socket notifySocket, String user, DataInputStream dis, DataOutputStream dos) {
+    public Display(Socket mainSocket, Socket notifySocket, String usr, DataInputStream dis, DataOutputStream dos) {
         super("音声ソフトアプリ");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(500, 500);
@@ -38,7 +38,7 @@ public class Display extends JFrame {
 
         this.dis = dis;
         this.dos = dos;
-        this.user = user;
+        this.usr = usr;
 
         initComponents();
 
@@ -70,16 +70,16 @@ public class Display extends JFrame {
         // ボタン動作
         recordButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                // 録音処理
                 handleRecordButton();
-                // 録音処理を実装
             }
         });
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 listModel.addElement("録音 " + (listModel.getSize() + 1));
                 sendButton.setEnabled(false);
-                // 送信処理を実装
-                sendRecordedFile("_audio.wav");
+                // 送信処理
+                ClientFunc.sendFile(dis, dos, usr, "./client/_audio.wav");
                 sendButton.setEnabled(false);
                 isRecording = false;
             }
@@ -91,6 +91,11 @@ public class Display extends JFrame {
                 if (selectedValue != null) {
                     System.out.println("再生を開始しました: " + selectedValue);
                     // 再生処理を実装
+                    String[] parts = selectedValue.split(", Path: ");
+                    if (parts.length > 1) {
+                        String filePath = parts[1];
+                        ClientFunc.playWAV(filePath);
+                    }
                 }
             }
         });
@@ -138,14 +143,7 @@ public class Display extends JFrame {
         }).start();
     }
 
-    private void sendRecordedFile(String filePath) {
-        new Thread(() -> {
-            ClientFunc.sendFile(dis, dos, user, filePath);
-            System.out.println("File sent: " + filePath);
-        }).start();
-    }
-
     public static void main(String[] args) {
-        // この部分はClient.javaから呼び出すため削除します
+        // テスト用
     }
 }
