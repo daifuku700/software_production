@@ -65,10 +65,14 @@ class LoginFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String username = usernameField.getText();
                 if (username.isEmpty()) {
-                    JOptionPane.showMessageDialog(LoginFrame.this, "please input user name", "error", JOptionPane.ERROR_MESSAGE);
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(LoginFrame.this, "Please input username", "Error", JOptionPane.ERROR_MESSAGE);
+                    });
                 } 
                 else if (username.length() > 8) {
-                    JOptionPane.showMessageDialog(LoginFrame.this, "Username must be 8 characters or less", "error", JOptionPane.ERROR_MESSAGE);
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(LoginFrame.this, "Username must be 8 characters or less", "error", JOptionPane.ERROR_MESSAGE);
+                    });
                 } 
                 else {
                     synchronized (LoginFrame.this) {
