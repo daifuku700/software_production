@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -233,4 +235,47 @@ public class ClientFunc {
         return frame.getUsername();
     }
     
+
+public static void notifyServer() {
+        try {
+            InetAddress addr = InetAddress.getByName("localhost");
+            Socket notifySocket = new Socket(addr, 8081);
+            DataOutputStream notifyDos = new DataOutputStream(notifySocket.getOutputStream());
+            notifyDos.writeUTF("notify");
+            notifyDos.close();
+            notifySocket.close();
+        } catch (IOException e) {
+            System.err.println("Failed to notify server: " + e.getMessage());
+        }
+    }
+
+    // クライアントがサーバーからの通知を受信するためのハンドラー
+    public static class NotificationHandler implements Runnable {
+        private Socket socket;
+    
+        public NotificationHandler(Socket socket) {
+            this.socket = socket;
+        }
+    
+        @Override
+        public void run() {
+            try (DataInputStream dis = new DataInputStream(socket.getInputStream())) {
+                while (!socket.isClosed()) {  // 変更箇所: ソケットが閉じられたかどうかを確認
+                    try {
+                        String message = dis.readUTF();
+                        System.out.println("Notification received: " + message);
+                    } catch (IOException e) {
+                        if (socket.isClosed()) {
+                            System.out.println("Notification socket closed.");
+                        } else {
+                            System.out.println("Error reading from notification socket: " + e.getMessage());
+                        }
+                        break; // エラーが発生したらループを抜ける
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Error in notification handler setup: " + e.getMessage());
+            }
+        }
+    }    
 }
