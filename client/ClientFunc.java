@@ -23,6 +23,11 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 public class ClientFunc {
     public ClientFunc() {
     }
@@ -214,6 +219,22 @@ public class ClientFunc {
         return chat;
     }
 
+    public static String login() {
+        LoginFrame frame = new LoginFrame();
+        frame.setVisible(true);
+        synchronized (frame) {
+            while (frame.getUsername().isEmpty()) {
+                try {
+                    frame.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        frame.setVisible(false);
+        return frame.getUsername();
+    }
+
     public static void notifyServer() {
         try {
             InetAddress addr = InetAddress.getByName("localhost");
@@ -230,15 +251,15 @@ public class ClientFunc {
     // クライアントがサーバーからの通知を受信するためのハンドラー
     public static class NotificationHandler implements Runnable {
         private Socket socket;
-    
+
         public NotificationHandler(Socket socket) {
             this.socket = socket;
         }
-    
+
         @Override
         public void run() {
             try (DataInputStream dis = new DataInputStream(socket.getInputStream())) {
-                while (!socket.isClosed()) {  // 変更箇所: ソケットが閉じられたかどうかを確認
+                while (!socket.isClosed()) { // 変更箇所: ソケットが閉じられたかどうかを確認
                     try {
                         String message = dis.readUTF();
                         System.out.println("Notification received: " + message);
@@ -255,5 +276,5 @@ public class ClientFunc {
                 System.out.println("Error in notification handler setup: " + e.getMessage());
             }
         }
-    }    
+    }
 }
