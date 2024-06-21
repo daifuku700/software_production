@@ -6,9 +6,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Scanner;
+
+import javax.swing.SwingUtilities;
 
 public class Client extends ClientFunc {
     public static void main(String args[]) throws IOException {
@@ -30,40 +30,48 @@ public class Client extends ClientFunc {
             String usr = "usr";
 
             String cmd;
-            
-            usr = login();
-            System.out.println("login: " + usr);
-            do {
-                System.out.print("input next cmd: ");
-                cmd = scan.next();
 
-                switch (cmd) {
-                    case "send":
-                        sendFile(dis, dos, usr, "./client/audio.wav");
-                        notifyServer(); // 二つ目のサーバーに通知
-                        break;
-                    case "get":
-                        System.out.print("input ID: ");
-                        int ID = scan.nextInt();
-                        if (ID < 1) {
-                            System.out.println("ID should be positive");
-                            break;
-                        }
-                        getFile(dis, dos, ID);
-                        break;
-                    case "getChat":
-                        ArrayList<HashMap<String, String>> chat = getChat(dis, dos);
-                        for (HashMap<String, String> c : chat) {
-                            System.out.println(c);
-                        }
-                        break;
-                    case "end":
-                        dos.writeUTF("end");
-                        break;
-                    default:
-                        System.out.println("please input correct cmd");
+            usr = login();
+            String tmpUsr = usr; // 再代入用の一時変数
+            System.out.println("login: " + usr);
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    new Display(mainSocket, notifySocket, tmpUsr, dis, dos);
                 }
-            } while (!cmd.equals("end"));
+            });
+
+            // do {
+            // System.out.print("input next cmd: ");
+            // cmd = scan.next();
+
+            // switch (cmd) {
+            // case "send":
+            // sendFile(dis, dos, usr, "./client/audio.wav");
+            // notifyServer(); // 二つ目のサーバーに通知
+            // break;
+            // case "get":
+            // System.out.print("input ID: ");
+            // int ID = scan.nextInt();
+            // if (ID < 1) {
+            // System.out.println("ID should be positive");
+            // break;
+            // }
+            // getFile(dis, dos, ID);
+            // break;
+            // case "getChat":
+            // ArrayList<HashMap<String, String>> chat = getChat(dis, dos);
+            // for (HashMap<String, String> c : chat) {
+            // System.out.println(c);
+            // }
+            // break;
+            // case "end":
+            // dos.writeUTF("end");
+            // break;
+            // default:
+            // System.out.println("please input correct cmd");
+            // }
+            // } while (!cmd.equals("end"));
         } finally {
             System.out.println("closing...");
             scan.close();

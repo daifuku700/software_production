@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,14 +24,21 @@ public class Display extends JFrame {
     private JList<String> recordingList;
     private DefaultListModel<String> listModel;
     private boolean isRecording;
+    private DataInputStream dis;
+    private DataOutputStream dos;
+    private String user;
 
     private static final int PANEL_WIDTH = 200;
 
-    public Display() {
+    public Display(Socket mainSocket, Socket notifySocket, String user, DataInputStream dis, DataOutputStream dos) {
         super("音声ソフトアプリ");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(500, 500);
         setLocationRelativeTo(null);
+
+        this.dis = dis;
+        this.dos = dos;
+        this.user = user;
 
         initComponents();
 
@@ -65,14 +71,17 @@ public class Display extends JFrame {
         recordButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleRecordButton();
+                // 録音処理を実装
             }
         });
-
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                listModel.addElement("_audio.wav");
+                listModel.addElement("録音 " + (listModel.getSize() + 1));
                 sendButton.setEnabled(false);
+                // 送信処理を実装
                 sendRecordedFile("_audio.wav");
+                sendButton.setEnabled(false);
+                isRecording = false;
             }
         });
 
@@ -81,7 +90,7 @@ public class Display extends JFrame {
                 String selectedValue = recordingList.getSelectedValue();
                 if (selectedValue != null) {
                     System.out.println("再生を開始しました: " + selectedValue);
-                    ClientFunc.playWAV(selectedValue);
+                    // 再生処理を実装
                 }
             }
         });
@@ -91,20 +100,13 @@ public class Display extends JFrame {
     }
 
     private void loadChatData() {
-        try (Socket socket = new Socket("localhost", 8080);
-                DataInputStream dis = new DataInputStream(socket.getInputStream());
-                DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
-
-            ArrayList<HashMap<String, String>> chatData = ClientFunc.getChat(dis, dos);
-            SwingUtilities.invokeLater(() -> {
-                for (HashMap<String, String> chat : chatData) {
-                    String entry = "ID: " + chat.get("id") + ", Path: " + chat.get("path");
-                    listModel.addElement(entry);
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ArrayList<HashMap<String, String>> chatData = ClientFunc.getChat(dis, dos);
+        SwingUtilities.invokeLater(() -> {
+            for (HashMap<String, String> chat : chatData) {
+                String entry = "ID: " + chat.get("id") + ", Path: " + chat.get("path"); // あとで編集
+                listModel.addElement(entry);
+            }
+        });
     }
 
     private void handleRecordButton() {
@@ -117,7 +119,9 @@ public class Display extends JFrame {
         isRecording = true;
         sendButton.setEnabled(false);
         recordButton.setText("録音中...");
+        // 録音処理を実装
         System.out.println("録音を開始しました");
+        // ClientFuncを呼び出す
         new Thread(new Runnable() {
             public void run() {
                 ClientFunc.makeWAV("_audio.wav");
@@ -136,23 +140,12 @@ public class Display extends JFrame {
 
     private void sendRecordedFile(String filePath) {
         new Thread(() -> {
-            try (Socket socket = new Socket("localhost", 8080);
-                    DataInputStream dis = new DataInputStream(socket.getInputStream());
-                    DataOutputStream dos = new DataOutputStream(socket.getOutputStream())) {
-
-                ClientFunc.sendFile(dis, dos, "usr", filePath);
-                System.out.println("File sent: " + filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ClientFunc.sendFile(dis, dos, user, filePath);
+            System.out.println("File sent: " + filePath);
         }).start();
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new Display();
-            }
-        });
+        // この部分はClient.javaから呼び出すため削除します
     }
 }
