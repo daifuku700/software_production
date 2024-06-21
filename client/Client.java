@@ -14,7 +14,7 @@ public class Client extends ClientFunc {
     public static void main(String args[]) throws IOException {
         InetAddress addr = InetAddress.getByName("localhost");
         System.out.println("addr = " + addr);
-        Socket mainsocket = new Socket(addr, 8080);
+        Socket mainSocket = new Socket(addr, 8080);
         Scanner scan = new Scanner(System.in);
 
         // 即時通信用のスレッドを開始
@@ -23,9 +23,9 @@ public class Client extends ClientFunc {
         notificationThread.start();
 
         try {
-            System.out.println("main socket = " + mainsocket);
-            DataInputStream dis = new DataInputStream(mainsocket.getInputStream());
-            DataOutputStream dos = new DataOutputStream(mainsocket.getOutputStream());
+            System.out.println("main socket = " + mainSocket);
+            DataInputStream dis = new DataInputStream(mainSocket.getInputStream());
+            DataOutputStream dos = new DataOutputStream(mainSocket.getOutputStream());
 
             String usr = "usr";
 
@@ -64,7 +64,7 @@ public class Client extends ClientFunc {
         } finally {
             System.out.println("closing...");
             scan.close();
-            mainsocket.close();
+            mainSocket.close();
             notifySocket.close();
         }
     }
