@@ -1,10 +1,11 @@
 package server;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DataBase {
-    private final String DB_NAME = "database.db";
+    private final String DB_NAME = "./server/database.db";
 
     private Connection c = null;
 
@@ -41,9 +42,10 @@ public class DataBase {
 
     /**
      * this is a function for inserting data to the database
-     * @param usr user name
-     * @param path path of the voice data
-     * @param date date of the voice data
+     *
+     * @param usr         user name
+     * @param path        path of the voice data
+     * @param date        date of the voice data
      * @param description description of the voice data
      */
     public void insertData(String usr, String path, String date, String description) {
@@ -59,6 +61,7 @@ public class DataBase {
 
     /**
      * this is a function for getting the max id of the dataset
+     *
      * @return max id of the dataset
      */
     public int getMaxId() {
@@ -79,6 +82,7 @@ public class DataBase {
 
     /**
      * this is a function for getting chat data from the database
+     *
      * @param id id of the chat
      * @return chat from the database {usr, path, date, description}
      */
@@ -103,6 +107,7 @@ public class DataBase {
 
     /**
      * this is a function for getting the path of the voice data
+     *
      * @param id id of the chat
      * @return path of the voice data
      */
@@ -123,6 +128,33 @@ public class DataBase {
     }
 
     /**
+     * this is a function for getting all the data from the database
+     *
+     * @return all the data from the database {usr, path, date, description}
+     */
+    public ArrayList<HashMap<String, String>> getAll() {
+        ArrayList<HashMap<String, String>> data = new ArrayList<HashMap<String, String>>();
+        try {
+            ResultSet rs = stmt.executeQuery("SELECT * FROM chat");
+            while (rs.next()) {
+                HashMap<String, String> tmp = new HashMap<String, String>();
+                tmp.put("id", rs.getString("id"));
+                tmp.put("usr", rs.getString("usr"));
+                tmp.put("path", rs.getString("path"));
+                tmp.put("date", rs.getString("date"));
+                tmp.put("description", rs.getString("description"));
+                data.add(tmp);
+            }
+            rs.close();
+            System.out.println("got all data");
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+            System.err.println("cannot get all data");
+        }
+        return data;
+    }
+
+    /**
      * this is a function to close the connection to the database
      * ! you should call this function when you finish using the database
      */
@@ -131,10 +163,10 @@ public class DataBase {
             if (this.c != null) {
                 this.c.close();
             }
-            System.out.println("closed connection");
+            System.out.println("db closed");
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
-            System.out.println("cannot close connection");
+            System.out.println("cannot close db");
         }
     }
 }

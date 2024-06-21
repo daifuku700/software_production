@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
@@ -79,7 +81,7 @@ public class ClientFunc {
         }
     }
 
-    public static void receiveFile(DataInputStream dis, DataOutputStream dos, int ID) {
+    public static void getFile(DataInputStream dis, DataOutputStream dos, int ID) {
         try {
             dos.writeUTF("get");
 
@@ -177,7 +179,39 @@ public class ClientFunc {
         } catch (IOException e) {
             System.err.println("File send error: " + e.getMessage());
         }
+    }
 
+    public static ArrayList<HashMap<String, String>> getChat(DataInputStream dis, DataOutputStream dos) {
+        ArrayList<HashMap<String, String>> chat = new ArrayList<HashMap<String, String>>();
+        try {
+            dos.writeUTF("getChat");
+
+            String response = dis.readUTF();
+            if (!response.equals("ready")) {
+                System.err.println("ERR: cannot get response from server");
+                return chat;
+            }
+
+            int size = dis.readInt();
+            for (int i = 0; i < size; i++) {
+                HashMap<String, String> tmp = new HashMap<String, String>();
+                tmp.put("id", dis.readUTF());
+                tmp.put("usr", dis.readUTF());
+                tmp.put("path", dis.readUTF());
+                tmp.put("date", dis.readUTF());
+                tmp.put("description", dis.readUTF());
+                chat.add(tmp);
+            }
+            response = dis.readUTF();
+            System.out.println(response);
+            if (!response.equals("finish")) {
+                System.err.println("ERR: cannot get response from server");
+                return chat;
+            }
+        } catch (IOException e) {
+            System.err.println("File send error: " + e.getMessage());
+        }
+        return chat;
     }
 
     public static void notifyServer() {
