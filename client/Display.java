@@ -92,30 +92,33 @@ public class Display extends JFrame {
                 ClientFunc.sendFile(dis, dos, user, "./client/audio.wav");
                 sendButton.setEnabled(false);
                 isRecording = false;
+                reloadComponents(); // 再読み込み
             }
         });
 
         recordingList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                String selectedValue = recordingList.getSelectedValue();
-                if (selectedValue != null) {
+                int selectedIndex = recordingList.getSelectedIndex();
+                if (selectedIndex != -1) {
+                    String selectedValue = recordingList.getModel().getElementAt(selectedIndex);
                     System.out.println("再生を開始しました: " + selectedValue);
                     // 再生処理を実装
                     new Thread(() -> {
-                        String[] parts = selectedValue.split(":");
-                        if (parts.length > 1) {
-                            String filePath = "./client/music/" + parts[1].trim() + ".wav";
-                            Path path = Paths.get(filePath);
-                            try {
+                        try {
+                            String[] parts = selectedValue.split(":");
+                            if (parts.length > 0) {
+                                String id = parts[0].trim();
+                                String filePath = "./client/music/" + id + ".wav"; // IDを使ってファイルパスを指定
+                                Path path = Paths.get(filePath);
                                 if (Files.exists(path)) {
                                     ClientFunc.playWAV(filePath);
                                 } else {
-                                    ClientFunc.getFile(dis, dos, Integer.parseInt(parts[0].trim()));
+                                    ClientFunc.getFile(dis, dos, Integer.parseInt(id));
                                     ClientFunc.playWAV(filePath);
                                 }
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
                             }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                     }).start();
                 }
@@ -170,6 +173,14 @@ public class Display extends JFrame {
         isRecording = false;
         sendButton.setEnabled(true);
         System.out.println("録音を終了しました");
+    }
+
+    public void reloadComponents() {
+        // コンポーネントの再初期化
+        getContentPane().removeAll();
+        initComponents();
+        revalidate();
+        repaint();
     }
 
     public static void main(String[] args) {
