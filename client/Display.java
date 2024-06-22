@@ -1,9 +1,5 @@
 package client;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -14,6 +10,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -102,17 +101,23 @@ public class Display extends JFrame {
                 if (selectedValue != null) {
                     System.out.println("再生を開始しました: " + selectedValue);
                     // 再生処理を実装
-                    String[] parts = selectedValue.split(":");
-                    if (parts.length > 1) {
-                        String filePath = "./client/music/" + parts[0] + ".wav";
-                        Path path = Paths.get(filePath);
-                        if (Files.exists(path)) {
-                            ClientFunc.playWAV(filePath);
-                        } else {
-                            ClientFunc.getFile(dis, dos, Integer.parseInt(parts[0]));
-                            ClientFunc.playWAV(filePath);
+                    new Thread(() -> {
+                        String[] parts = selectedValue.split(":");
+                        if (parts.length > 1) {
+                            String filePath = "./client/music/" + parts[1].trim() + ".wav";
+                            Path path = Paths.get(filePath);
+                            try {
+                                if (Files.exists(path)) {
+                                    ClientFunc.playWAV(filePath);
+                                } else {
+                                    ClientFunc.getFile(dis, dos, Integer.parseInt(parts[0].trim()));
+                                    ClientFunc.playWAV(filePath);
+                                }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
                         }
-                    }
+                    }).start();
                 }
             }
         });
