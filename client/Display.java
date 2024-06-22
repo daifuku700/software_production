@@ -1,5 +1,9 @@
 package client;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -83,7 +87,7 @@ public class Display extends JFrame {
         });
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                listModel.addElement("録音 " + (listModel.getSize() + 1));
+                listModel.addElement("" + (listModel.getSize() + 1) + ": " + user);
                 sendButton.setEnabled(false);
                 // 送信処理を実装
                 ClientFunc.sendFile(dis, dos, user, "./client/audio.wav");
@@ -98,10 +102,16 @@ public class Display extends JFrame {
                 if (selectedValue != null) {
                     System.out.println("再生を開始しました: " + selectedValue);
                     // 再生処理を実装
-                    String[] parts = selectedValue.split(", Path: ");
+                    String[] parts = selectedValue.split(":");
                     if (parts.length > 1) {
-                        String filePath = parts[1];
-                        ClientFunc.playWAV(filePath);
+                        String filePath = "./client/music/" + parts[0] + ".wav";
+                        Path path = Paths.get(filePath);
+                        if (Files.exists(path)) {
+                            ClientFunc.playWAV(filePath);
+                        } else {
+                            ClientFunc.getFile(dis, dos, Integer.parseInt(parts[0]));
+                            ClientFunc.playWAV(filePath);
+                        }
                     }
                 }
             }
@@ -128,7 +138,7 @@ public class Display extends JFrame {
         ArrayList<HashMap<String, String>> chatData = ClientFunc.getChat(dis, dos);
         SwingUtilities.invokeLater(() -> {
             for (HashMap<String, String> chat : chatData) {
-                String entry = "ID: " + chat.get("id") + ", Path: " + chat.get("path"); // あとで編集
+                String entry = chat.get("id") + ": " + chat.get("usr"); // あとで編集
                 listModel.addElement(entry);
             }
         });
@@ -148,7 +158,7 @@ public class Display extends JFrame {
         System.out.println("録音を開始しました");
         // ClientFuncを呼び出す
         // 録音処理をメインスレッドで実行
-        ClientFunc.makeWAV("./client/_audio.wav");
+        ClientFunc.makeWAV("./client/audio.wav");
 
         // 録音処理が終わった後にUIを更新
         recordButton.setText("録音");
