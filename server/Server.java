@@ -61,13 +61,13 @@ public class Server {
     static int NOTIFY_PORT = 8081;
 
     public static void main(String args[]) throws IOException {
-        ServerSocket mainsoc = new ServerSocket(MAIN_PORT);
-        ServerSocket notifysoc = new ServerSocket(NOTIFY_PORT);
+        ServerSocket mainSoc = new ServerSocket(MAIN_PORT);
+        ServerSocket notifySoc = new ServerSocket(NOTIFY_PORT);
 
         Thread notifyServerThread = new Thread(() -> {
             try {
                 while (true) {
-                    Socket clientSocket = notifysoc.accept();
+                    Socket clientSocket = notifySoc.accept();
                     ServerFunc.addClient(clientSocket);
                     new Thread(() -> {
                         try (DataInputStream dis = new DataInputStream(clientSocket.getInputStream())) {
@@ -91,7 +91,7 @@ public class Server {
 
         try {
             while (true) {
-                Socket s = mainsoc.accept();
+                Socket s = mainSoc.accept();
                 ServerThread st = new ServerThread(s);
                 st.start();
             }
@@ -99,12 +99,12 @@ public class Server {
             System.out.println("Error in main server: " + e.getMessage());
         } finally {
             try {
-                mainsoc.close();
+                mainSoc.close();
             } catch (IOException e) {
                 System.out.println("Error closing main server socket: " + e.getMessage());
             }
             try {
-                notifysoc.close();
+                notifySoc.close();
             } catch (IOException e) {
                 System.out.println("Error closing notify server socket: " + e.getMessage());
             }
