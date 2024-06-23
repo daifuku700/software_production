@@ -1,4 +1,3 @@
-
 package client;
 
 import java.io.DataInputStream;
@@ -15,18 +14,18 @@ public class Client extends ClientFunc {
 
         // 即時通信用のスレッドを開始
         Socket notifySocket = new Socket(addr, 8081);
-        Thread notificationThread = new Thread(new ClientFunc.NotificationHandler(notifySocket));
-        notificationThread.start();
-
-        System.out.println("main socket = " + mainSocket);
         DataInputStream dis = new DataInputStream(mainSocket.getInputStream());
         DataOutputStream dos = new DataOutputStream(mainSocket.getOutputStream());
-
         String usr = "usr";
 
         usr = login();
         System.out.println("login: " + usr);
 
-        new Display(mainSocket, notifySocket, usr, dis, dos);
+        Display display = new Display(mainSocket, notifySocket, usr, dis, dos);
+
+        Thread notificationThread = new Thread(new ClientFunc.NotificationHandler(notifySocket, display));
+        notificationThread.start();
+
+        System.out.println("main socket = " + mainSocket);
     }
 }

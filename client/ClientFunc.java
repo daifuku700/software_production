@@ -23,12 +23,9 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 public class ClientFunc {
+    public static Display display;
+
     public ClientFunc() {
     }
 
@@ -172,6 +169,7 @@ public class ClientFunc {
                 }
 
                 System.out.println("file send successfully");
+                notifyServer();
             } catch (IOException e) {
                 System.err.println("File send error: " + e.getMessage());
             }
@@ -251,18 +249,22 @@ public class ClientFunc {
     // クライアントがサーバーからの通知を受信するためのハンドラー
     public static class NotificationHandler implements Runnable {
         private Socket socket;
+        private Display display;
 
-        public NotificationHandler(Socket socket) {
+        public NotificationHandler(Socket socket, Display display) {
             this.socket = socket;
+            this.display = display;
         }
 
         @Override
         public void run() {
             try (DataInputStream dis = new DataInputStream(socket.getInputStream())) {
+                System.out.println("Notification handler started.");
                 while (!socket.isClosed()) { // 変更箇所: ソケットが閉じられたかどうかを確認
                     try {
                         String message = dis.readUTF();
                         System.out.println("Notification received: " + message);
+                        display.reloadComponents();
                     } catch (IOException e) {
                         if (socket.isClosed()) {
                             System.out.println("Notification socket closed.");
@@ -272,6 +274,7 @@ public class ClientFunc {
                         break; // エラーが発生したらループを抜ける
                     }
                 }
+                System.out.println("Notification handler finished.");
             } catch (IOException e) {
                 System.out.println("Error in notification handler setup: " + e.getMessage());
             }
