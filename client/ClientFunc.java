@@ -264,6 +264,7 @@ public class ClientFunc {
                     try {
                         String message = dis.readUTF();
                         System.out.println("Notification received: " + message);
+                        Thread.sleep(1000);
                         display.reloadComponents();
                     } catch (IOException e) {
                         if (socket.isClosed()) {
@@ -277,6 +278,8 @@ public class ClientFunc {
                 System.out.println("Notification handler finished.");
             } catch (IOException e) {
                 System.out.println("Error in notification handler setup: " + e.getMessage());
+            } catch (InterruptedException e) {
+                System.out.println("Error in notification handler sleep: " + e.getMessage());
             }
         }
     }
