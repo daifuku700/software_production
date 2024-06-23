@@ -1,9 +1,5 @@
 package client;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -14,6 +10,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -93,26 +92,35 @@ public class Display extends JFrame {
                 ClientFunc.sendFile(dis, dos, user, "./client/audio.wav");
                 sendButton.setEnabled(false);
                 isRecording = false;
+                reloadComponents(); // 再読み込み
             }
         });
 
         recordingList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                String selectedValue = recordingList.getSelectedValue();
-                if (selectedValue != null) {
+                int selectedIndex = recordingList.getSelectedIndex();
+                if (selectedIndex != -1) {
+                    String selectedValue = recordingList.getModel().getElementAt(selectedIndex);
                     System.out.println("再生を開始しました: " + selectedValue);
                     // 再生処理を実装
-                    String[] parts = selectedValue.split(":");
-                    if (parts.length > 1) {
-                        String filePath = "./client/music/" + parts[0] + ".wav";
-                        Path path = Paths.get(filePath);
-                        if (Files.exists(path)) {
-                            ClientFunc.playWAV(filePath);
-                        } else {
-                            ClientFunc.getFile(dis, dos, Integer.parseInt(parts[0]));
-                            ClientFunc.playWAV(filePath);
+                    new Thread(() -> {
+                        try {
+                            String[] parts = selectedValue.split(":");
+                            if (parts.length > 0) {
+                                String id = parts[0].trim();
+                                String filePath = "./client/music/" + id + ".wav"; // IDを使ってファイルパスを指定
+                                Path path = Paths.get(filePath);
+                                if (Files.exists(path)) {
+                                    ClientFunc.playWAV(filePath);
+                                } else {
+                                    ClientFunc.getFile(dis, dos, Integer.parseInt(id));
+                                    ClientFunc.playWAV(filePath);
+                                }
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
-                    }
+                    }).start();
                 }
             }
         });
@@ -165,6 +173,14 @@ public class Display extends JFrame {
         isRecording = false;
         sendButton.setEnabled(true);
         System.out.println("録音を終了しました");
+    }
+
+    public void reloadComponents() {
+        // コンポーネントの再初期化
+        getContentPane().removeAll();
+        initComponents();
+        revalidate();
+        repaint();
     }
 
     public static void main(String[] args) {
