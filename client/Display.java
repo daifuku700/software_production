@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -35,11 +36,12 @@ public class Display extends JFrame {
     private String user;
     private Socket mainSocket;
     private Socket notifySocket;
-
     private static final int PANEL_WIDTH = 200;
+    private static final int LIST_ITEM_HEIGHT = 50;
+    private static final int HORIZONTAL_MARGIN = 20;
 
     public Display(Socket mainSocket, Socket notifySocket, String usr, DataInputStream dis, DataOutputStream dos) {
-        super("音声ソフトアプリ");
+        super("Voice Board");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(500, 500);
         setLocationRelativeTo(null);
@@ -60,8 +62,12 @@ public class Display extends JFrame {
         // リストモデルとリスト
         listModel = new DefaultListModel<>();
         recordingList = new JList<>(listModel);
-        recordingList.setCellRenderer(new BubbleListCellRenderer(PANEL_WIDTH)); // 横幅を指定
-        JScrollPane scrollPane = new JScrollPane(recordingList); // スクロールバー
+        recordingList.setCellRenderer(new BubbleListCellRenderer(PANEL_WIDTH, HORIZONTAL_MARGIN));
+        recordingList.setFixedCellHeight(LIST_ITEM_HEIGHT);
+        JScrollPane scrollPane = new JScrollPane(recordingList);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        scrollPane.getViewport().setBackground(recordingList.getBackground());
 
         // ボタンパネル
         JPanel buttonPanel = new JPanel(new FlowLayout());
