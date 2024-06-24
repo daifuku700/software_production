@@ -23,4 +23,4 @@ if __name__ == "__main__":
         conn.commit()
         cur.close()
         conn.close()
-        time.sleep(1)
+        time.sleep(60)
