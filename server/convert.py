@@ -8,6 +8,7 @@ if __name__ == "__main__":
     dbname = "server/database.db"
 
     while True:
+        print("start")
         conn = sqlite3.connect(dbname)
         cur = conn.cursor()
         cur.execute("SELECT * FROM chat WHERE description = ''")
@@ -18,7 +19,8 @@ if __name__ == "__main__":
                 "UPDATE chat SET description = ? WHERE id = ?", (result["text"], row[0])
             )
 
+        print("converted")
         conn.commit()
         cur.close()
         conn.close()
-        time.sleep(1)
+        time.sleep(60)

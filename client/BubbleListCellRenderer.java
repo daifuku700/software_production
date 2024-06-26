@@ -10,13 +10,17 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.AbstractBorder;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 
 public class BubbleListCellRenderer extends JLabel implements ListCellRenderer<Object> {
     private final int width;
+    private final int horizontalMargin;
 
-    public BubbleListCellRenderer(int width) {
+    public BubbleListCellRenderer(int width, int horizontalMargin) {
         setOpaque(true);
         this.width = width;
+        this.horizontalMargin = horizontalMargin;
     }
 
     @Override
@@ -24,22 +28,25 @@ public class BubbleListCellRenderer extends JLabel implements ListCellRenderer<O
             boolean cellHasFocus) {
         setText(value.toString());
 
-        // Set rounded border
-        setBorder(new RoundBorder(10, Color.WHITE));
+        // Create a compound border with rounded edges and horizontal margin
+        CompoundBorder compoundBorder = new CompoundBorder(
+                new RoundBorder(10, Color.LIGHT_GRAY),
+                new EmptyBorder(5, 10, 5, 10) // top, left, bottom, right padding
+        );
+        setBorder(compoundBorder);
 
         setOpaque(true);
-        setBackground(Color.LIGHT_GRAY);
-        setForeground(Color.BLACK);
 
         if (isSelected) {
-            setBackground(Color.BLUE);
-            setForeground(Color.WHITE);
+            setBackground(Color.CYAN);
+            setForeground(Color.BLACK);
         } else {
-            setBackground(Color.LIGHT_GRAY);
+            setBackground(Color.WHITE);
             setForeground(Color.BLACK);
         }
 
-        setPreferredSize(new Dimension(width, getPreferredSize().height));
+        // Set preferred size with horizontal margin
+        setPreferredSize(new Dimension(width - (2 * horizontalMargin), getPreferredSize().height));
 
         return this;
     }
